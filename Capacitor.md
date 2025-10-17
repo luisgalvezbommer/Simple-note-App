@@ -27,9 +27,17 @@ cd android
 # the apk will be in android/app/build/outputs/apk/debug/app-debug.apk
 ```
 
+If fail, because of sdk do this:
+
+```bash
+ls -la ~/Android/Sdk 2>/dev/null || ls -la ~/Library/Android/sdk 2>/dev/null || echo "SDK not found in common locations"
+echo "sdk.dir=$HOME/Android/Sdk" > android/local.properties
+```
+
 Everytime after updating code, run:
 
 ```bash
+npm run build
 npx cap sync android
 cd android
 ./gradlew assembleDebug

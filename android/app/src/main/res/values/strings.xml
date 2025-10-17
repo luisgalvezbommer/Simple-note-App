@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Simple App</string>
+    <string name="title_activity_main">Simple App</string>
+    <string name="package_name">com.luisgalvezbommer.simpleapp</string>
+    <string name="custom_url_scheme">com.luisgalvezbommer.simpleapp</string>
+</resources>

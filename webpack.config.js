@@ -8,9 +8,16 @@ module.exports = {
         filename: 'bundle.js',
     },
     devServer: {
-        static: {
-            directory: path.join(__dirname, 'src'),
-        },
+        // Use multiple static directories
+        static: [
+            {
+                directory: path.join(__dirname, 'src'),
+            },
+            {
+                directory: path.join(__dirname, 'assets'),
+                publicPath: '/assets',
+            }
+        ],
         compress: true,
         port: 8080,
     },

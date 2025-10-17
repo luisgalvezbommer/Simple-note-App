@@ -9,7 +9,7 @@
 6. remove `"type": "commonjs"` from package.json if exists
 7. Add script to `package.json` "scripts" --> `"build": "webpack"`
 8. Run `npm run build`
-9. Run `firebase deploy` or `webpack serve`
+9. Run `firebase deploy` or `npx webpack serve`
 
 
 
@@ -37,3 +37,12 @@ I don't need this when i use webpack to bundle my code. I only need this when i 
   ```
 
   
+  ## Else
+  - Make your first Admin user
+    - Set a secret in Firebase
+        - `firebase functions:config:set admin.secret="Tevion89!"`
+        - `firebase deploy --only functions`
+    - Call the function via URL
+        - `https://us-central1-YOUR_PROJECT_ID.cloudfunctions.net/setAdminByEmail?email=luisgalvezbommer@gmail.com&secret=YOUR_SECRET_PASSWORD_HERE`
+        - e.g. region=europe-west1, project_id=preparation-83dfb, email=lagb18071997@gmail.com, secret=Tevion89!
+        - `https://europe-west1-preparation-83dfb.cloudfunctions.net/setAdminByEmail?email=lagb18071997@gmail.com&secret=Tevion89!`

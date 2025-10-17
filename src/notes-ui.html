@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Note App</title>
+    <script defer src="bundle.js"></script>
+    <style>
+        body {
+            background-color: black;
+            height: 100vh;
+        }
+
+        #form-container {
+            display: flex;
+            flex-direction: column;
+            margin-top: 20px;
+            width: 300px;
+        }
+
+        #add-note-button {
+            position: fixed;
+            bottom: 5%;
+            right: 5%;
+            width: 80px;
+            height: 80px;
+            padding: 20px;
+            border-radius: 50%;
+            font-size: 40px;
+            font-weight: bold;
+            color: white;
+            background-color: #039be5;
+            border: white;
+            cursor: pointer;
+        }
+
+        #logout-button {
+            color: white;
+            background-color: black;
+            margin-top: 10px;
+            border: #fff solid 1px;
+            border-radius: 8px;
+            padding: 8px;
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+
+        }
+
+        /* Modal Styles */
+        #modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #modal-overlay.show {
+            display: flex;
+        }
+
+        #modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            width: 90%;
+            max-width: 400px;
+        }
+
+        #modal-content h2 {
+            margin-top: 0;
+            color: #039be5;
+        }
+
+        #modal-content input,
+        #modal-content textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        #modal-content textarea {
+            min-height: 100px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .modal-buttons button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        #save-note-button {
+            background-color: #039be5;
+            color: white;
+        }
+
+        #cancel-note-button {
+            background-color: #ddd;
+            color: #333;
+        }
+
+        /* Notes Container Styles */
+        #notes-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            padding-bottom: 100px;
+            /* Space for the add button */
+        }
+
+        .note-card {
+            background-color: azure;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: box-shadow 0.3s ease;
+            position: relative;
+        }
+
+        .note-card:hover {
+            background-color: beige;
+        }
+
+        .note-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #039be5;
+            margin: 0 0 10px 0;
+        }
+
+        .note-content {
+            font-size: 14px;
+            color: #333;
+            margin: 0 0 10px 0;
+            white-space: pre-wrap;
+            /* Preserve line breaks */
+            word-wrap: break-word;
+        }
+
+        .note-timestamp {
+            font-size: 12px;
+            color: #999;
+            text-align: right;
+        }
+
+        .no-notes-message {
+            text-align: center;
+            color: white;
+            font-size: 18px;
+            margin-top: 50px;
+        }
+
+        .note-buttons-container {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .note-edit-button,
+        .note-delete-button {
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .note-edit-button {
+            background-color: #039be5;
+            border-radius: 50%;
+        }
+
+        .note-delete-button {
+            background-color: #e53935;
+        }
+    </style>
+</head>
+
+<body>
+
+
+    <!-- Notes Display Container -->
+    <div id="notes-container">
+        <p class="no-notes-message">Loading notes...</p>
+    </div>
+
+    <!-- Modal for adding notes -->
+    <div id="modal-overlay">
+        <div id="modal-content">
+            <h2 id="modal-title">Add New Note</h2>
+            <input id="note-title-input" type="text" placeholder="Title">
+            <textarea id="note-content-input" placeholder="Write your note here..."></textarea>
+            <div class="modal-buttons">
+                <button id="cancel-note-button">Cancel</button>
+                <button id="save-note-button">Save Note</button>
+            </div>
+        </div>
+    </div>
+    <button id="add-note-button">+</button>
+    <button id="logout-button">Logout</button>
+</body>
+
+</html>

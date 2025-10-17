@@ -2,7 +2,8 @@
 import { getAnalytics } from "firebase/analytics";
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth";
-import { getDatabase, push, ref, set } from "firebase/database";
+import { getDatabase } from "firebase/database";
+import { notesUISetup } from "./notes";
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -27,125 +28,63 @@ const analytics = getAnalytics(app);
 const auth = getAuth(app);
 const db = getDatabase(app);
 
-function writeUserData(userId, name, email, imageUrl) {
-    // Create a reference to the user's entries
-    const userEntriesRef = ref(db, 'users/' + userId + '/entries');
 
-    console.log("User entries ref:", userEntriesRef);
-    // Push creates a new child with a unique auto-generated key
-    const newEntryRef = push(userEntriesRef);
-    console.log("New entry ref:", newEntryRef);
 
-    // Set the data at the new entry
-    set(newEntryRef, {
-        username: name,
-        email: email,
-        profile_picture: imageUrl,
-        timestamp: Date.now()
-    });
-}
+function googleAuthSetup() {
+    // Google Auth setup
+    const provider = new GoogleAuthProvider();
+    const loginButton = document.getElementById('login-button');
+    const logoutButton = document.getElementById('logout-button')
 
-function handleButtonClick() {
-    console.log("clicked")
-
-    // Check if user is logged in
-    const currentUser = auth.currentUser;
-    if (!currentUser) {
-        alert('Please log in first!');
-        return;
+    // Login with Google
+    if (loginButton) {
+        loginButton.addEventListener('click', () => {
+            console.log("Logging in")
+            signInWithPopup(auth, provider)
+                .then((result) => {
+                    console.log('User logged in:', result.user);
+                    // Redirect to notes UI after successful login
+                    window.location.href = 'notes-ui.html';
+                })
+                .catch((error) => {
+                    console.error('Login error:', error);
+                    alert('Login failed: ' + error.message);
+                });
+        });
     }
 
-    const nameInput = document.getElementById('name-input');
-    const emailInput = document.getElementById('email-input');
-    const imageUrlInput = document.getElementById('image-url-input');
-
-    const name = nameInput.value.trim();
-    const email = emailInput.value.trim();
-    const imageUrl = imageUrlInput.value.trim();
-
-
-    if (!name || !email) {
-        alert('Please enter both name and email.');
-        return
-    }
-
-    // Use the authenticated user's unique ID
-    const userId = currentUser.uid;
-    console.log("User ID:", userId);
-
-    try {
-        writeUserData(userId, name, email, imageUrl);
-        alert('User data saved successfully!');
-        nameInput.value = '';
-        emailInput.value = '';
-        imageUrlInput.value = '';
-    } catch (error) {
-        console.error('Error writing user data:', error);
-        alert('Failed to save user data. Please try again.');
+    if (logoutButton) {
+        // Logout
+        logoutButton.addEventListener('click', () => {
+            console.log("Logging out")
+            signOut(auth)
+                .then(() => {
+                    console.log('User logged out');
+                    // Redirect to notes UI after successful login
+                    window.location.href = 'index.html';
+                })
+                .catch((error) => {
+                    console.error('Logout error:', error);
+                });
+        });
     }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    const button = document.getElementById('click-button');
-    if (button) {
-        button.addEventListener('click', handleButtonClick);
-    }
+    googleAuthSetup();
 
-    // Google Auth setup
-    const loginButton = document.getElementById('login-button');
-    const logoutButton = document.getElementById('logout-button');
-    const userDetails = document.getElementById('user-details');
-
-    console.log('Login button:', loginButton);
-    console.log('Logout button:', logoutButton);
-    console.log('User details:', userDetails);
-
-    if (!loginButton || !logoutButton || !userDetails) {
-        console.error('One or more elements not found!');
-        return;
-    }
-
-    const provider = new GoogleAuthProvider();
-
-    // Login with Google
-    loginButton.addEventListener('click', () => {
-        console.log("Logging in")
-        signInWithPopup(auth, provider)
-            .then((result) => {
-                console.log('User logged in:', result.user);
-            })
-            .catch((error) => {
-                console.error('Login error:', error);
-                alert('Login failed: ' + error.message);
-            });
-    });
-
-    // Logout
-    logoutButton.addEventListener('click', () => {
-        console.log("Logging out")
-        signOut(auth)
-            .then(() => {
-                console.log('User logged out');
-            })
-            .catch((error) => {
-                console.error('Logout error:', error);
-            });
-    });
-
-    // Monitor auth state changes
+    // Wait for auth state to be ready before setting up notes UI
     onAuthStateChanged(auth, (user) => {
-        console.log("Auth state changed")
-        if (user) {
-            // User is logged in
-            userDetails.textContent = `Logged in as: ${user.email}`;
-            loginButton.style.display = 'none';
-            logoutButton.style.display = 'block';
-        } else {
-            // User is logged out
-            userDetails.textContent = 'No User logged in';
-            loginButton.style.display = 'block';
-            logoutButton.style.display = 'none';
-        }
-    });
+        console.log("Auth state changed, user:", user);
 
+        // Check if we're on notes-ui.html and user is not logged in
+        if (!user && window.location.pathname.endsWith('notes-ui.html')) {
+            console.log("Not logged in on notes page, redirecting to login");
+            window.location.href = 'index.html';
+            return;
+        }
+
+        // Setup notes UI (will only work if elements exist on the page)
+        notesUISetup(auth, db);
+    });
 });

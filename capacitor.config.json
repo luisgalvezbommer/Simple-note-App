@@ -1,5 +1,13 @@
 {
   "appId": "com.luisgalvezbommer.simpleapp",
   "appName": "Simple App",
-  "webDir": "src"
+  "webDir": "src",
+  "plugins": {
+    "FirebaseAuthentication": {
+      "skipNativeAuth": false,
+      "providers": [
+        "google.com"
+      ]
+    }
+  }
 }

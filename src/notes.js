@@ -102,7 +102,7 @@ function displayNotes(db, userId) {
             noteDeleteButton.className = 'note-delete-button';
 
             const deleteIcon = document.createElement('img');
-            deleteIcon.src = '/assets/icons/delete-icon.png';
+            deleteIcon.src = 'assets/icons/delete-icon.png';  // Removed leading slash for Capacitor compatibility
             deleteIcon.alt = 'Delete Note';
             noteDeleteButton.appendChild(deleteIcon);
 
@@ -110,7 +110,7 @@ function displayNotes(db, userId) {
             noteEditButton.className = 'note-edit-button';
 
             const editIcon = document.createElement('img');
-            editIcon.src = '/assets/icons/edit-icon.png';
+            editIcon.src = 'assets/icons/edit-icon.png';  // Removed leading slash for Capacitor compatibility
             editIcon.alt = 'Edit Note';
             noteEditButton.appendChild(editIcon);
 

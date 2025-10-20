@@ -4,6 +4,7 @@ import { getDatabase } from "firebase/database";
 import { notesUISetup } from "./notes";
 // Import unified authentication (works on both native and web!)
 import {
+    checkAuthStatus,
     getPlatform,
     isNativePlatform,
     onAuthStateChanged,
@@ -104,6 +105,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (user) {
                 console.log("User already logged in, setting up notes UI");
                 debugInfo.innerText += "\nSetting up notes UI";
+
+                // Debug auth status for database
+                await checkAuthStatus(app);
+
                 notesUISetup(db, user);
             }
         });

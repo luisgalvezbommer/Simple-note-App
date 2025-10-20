@@ -1,9 +1,15 @@
 // Import the functions you need from the SDKs you need
-import { getAnalytics } from "firebase/analytics";
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth";
 import { getDatabase } from "firebase/database";
 import { notesUISetup } from "./notes";
+// Import unified authentication (works on both native and web!)
+import {
+    getPlatform,
+    isNativePlatform,
+    onAuthStateChanged,
+    signInWithGoogle,
+    signOut
+} from "./auth-unified";
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -24,67 +30,82 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-const auth = getAuth(app);
+// const analytics = getAnalytics(app);
+// const auth = getAuth(app);
 const db = getDatabase(app);
 
+// Show platform info
+console.log('Running on platform:', getPlatform());
+console.log('Is native platform:', isNativePlatform());
+const debugInfo = document.getElementById('debug-info');
+debugInfo.innerText = "Start Debug";
 
 
-function googleAuthSetup() {
-    // Google Auth setup
-    const provider = new GoogleAuthProvider();
+function googleAuthLoginSetup() {
+    // Google Auth setup - works on both native and web!
     const loginButton = document.getElementById('login-button');
-    const logoutButton = document.getElementById('logout-button')
-
-    // Login with Google
+    debugInfo.innerText += "start auth setup"
+    // Login with Google (uses appropriate method for platform)
     if (loginButton) {
-        loginButton.addEventListener('click', () => {
-            console.log("Logging in")
-            signInWithPopup(auth, provider)
-                .then((result) => {
-                    console.log('User logged in:', result.user);
-                    // Redirect to notes UI after successful login
-                    window.location.href = 'notes-ui.html';
-                })
-                .catch((error) => {
-                    console.error('Login error:', error);
-                    alert('Login failed: ' + error.message);
-                });
-        });
-    }
-
-    if (logoutButton) {
-        // Logout
-        logoutButton.addEventListener('click', () => {
-            console.log("Logging out")
-            signOut(auth)
-                .then(() => {
-                    console.log('User logged out');
-                    // Redirect to notes UI after successful login
-                    window.location.href = 'index.html';
-                })
-                .catch((error) => {
-                    console.error('Logout error:', error);
-                });
+        loginButton.addEventListener('click', async () => {
+            console.log("Logging in...");
+            debugInfo.innerText += "\nButton clicked";
+            try {
+                // This automatically uses native on Android, web popup on browser
+                const user = await signInWithGoogle(app);
+                console.log('User logged in:', user);
+                // Redirect to notes UI after successful login
+                window.location.href = 'notes-ui.html';
+            } catch (error) {
+                console.error('Login error:', error);
+                alert('Login failed: ' + error.message);
+            }
         });
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    googleAuthSetup();
 
-    // Wait for auth state to be ready before setting up notes UI
-    onAuthStateChanged(auth, (user) => {
-        console.log("Auth state changed, user:", user);
+function googleAuthLogoutSetup() {
+    // Logout button setup (works on both native and web!)
+    const logoutButton = document.getElementById('logout-button');
 
-        // Check if we're on notes-ui.html and user is not logged in
-        if (!user && window.location.pathname.endsWith('notes-ui.html')) {
-            console.log("Not logged in on notes page, redirecting to login");
-            window.location.href = 'index.html';
-            return;
-        }
+    if (logoutButton) {
+        // Logout (uses appropriate method for platform)
+        logoutButton.addEventListener('click', async () => {
+            console.log("Logging out");
+            try {
+                await signOut(app);
+                console.log('User logged out');
+                // Redirect to login page after logout
+                window.location.href = 'index.html';
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+        });
+    }
+}
 
-        // Setup notes UI (will only work if elements exist on the page)
-        notesUISetup(auth, db);
-    });
+
+document.addEventListener('DOMContentLoaded', async () => {
+    debugInfo.innerText += "\nDOM loaded"
+    debugInfo.innerText += "\n" + window.location.pathname
+    if (window.location.pathname.endsWith('index.html') || window.location.pathname === '/') {
+        console.log("Setting up Google login");
+        debugInfo.innerText += "\nSetting up Google login";
+        googleAuthLoginSetup();
+
+    }
+    if (window.location.pathname.endsWith('notes-ui.html')) {
+        console.log("Setting up Google logout");
+        googleAuthLogoutSetup();
+
+        onAuthStateChanged(app, async (user) => {
+            // alert("Auth state changed: " + (user ? "logged in" : "logged out"));
+            if (user) {
+                console.log("User already logged in, setting up notes UI");
+                debugInfo.innerText += "\nSetting up notes UI";
+                notesUISetup(db, user);
+            }
+        });
+    }
 });

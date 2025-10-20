@@ -134,7 +134,8 @@ function displayNotes(db, userId) {
 }
 
 // Modal functionality
-export function notesUISetup(auth, db) {
+export function notesUISetup(db, currentUser) {
+    console.log('Initializing notes UI setup');
     const addNoteButton = document.getElementById('add-note-button');
     const notesContainer = document.getElementById('notes-container');
 
@@ -149,13 +150,17 @@ export function notesUISetup(auth, db) {
 
     // If elements don't exist (we're on index.html), just return
     if (!addNoteButton || !modalOverlay) {
+        console.log("No add note button or modal overlay found, skipping notes UI setup");
         return;
     }
 
-    // Get current user and display their notes
-    const currentUser = auth.currentUser;
-    if (currentUser) {
+    // Display notes for the current user
+    if (currentUser && currentUser.uid) {
+        console.log('Setting up notes UI for user:', currentUser.uid);
         displayNotes(db, currentUser.uid);
+    } else {
+        console.error('No current user provided to notesUISetup');
+        return;
     }
 
     // Event delegation for edit and delete buttons
@@ -185,8 +190,7 @@ export function notesUISetup(auth, db) {
             const noteTitle = noteCard.querySelector('.note-title').textContent;
 
             if (confirm(`Are you sure you want to delete "${noteTitle}"?`)) {
-                const currentUser = auth.currentUser;
-                if (currentUser) {
+                if (currentUser && currentUser.uid) {
                     deleteNoteFromDatabase(db, currentUser.uid, noteId);
                 }
             }
@@ -215,14 +219,6 @@ export function notesUISetup(auth, db) {
 
     // Save note when save button is clicked
     saveButton?.addEventListener('click', () => {
-        // Get current user at the time of saving
-        const currentUser = auth.currentUser;
-        if (!currentUser) {
-            alert('Please log in first!');
-            window.location.href = 'index.html';
-            return;
-        }
-
         const title = titleInput.value.trim();
         const content = contentInput.value.trim();
 
@@ -261,4 +257,5 @@ export function notesUISetup(auth, db) {
             closeModal();
         }
     });
+    console.log('Notes UI setup complete');
 }
